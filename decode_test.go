@@ -25,8 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kralicky/yaml/v3"
 	. "gopkg.in/check.v1"
-	"gopkg.in/yaml.v3"
 )
 
 var unmarshalIntTest = 123
@@ -1482,7 +1482,7 @@ func (s *S) TestMergeNestedStruct(c *C) {
 	// 2) A simple implementation might attempt to handle the key skipping
 	//    directly by iterating over the merging map without recursion, but
 	//    there are more complex cases that require recursion.
-	// 
+	//
 	// Quick summary of the fields:
 	//
 	// - A must come from outer and not overriden
@@ -1498,7 +1498,7 @@ func (s *S) TestMergeNestedStruct(c *C) {
 		A, B, C int
 	}
 	type Outer struct {
-		D, E      int
+		D, E   int
 		Inner  Inner
 		Inline map[string]int `yaml:",inline"`
 	}
@@ -1516,10 +1516,10 @@ func (s *S) TestMergeNestedStruct(c *C) {
 	// Repeat test with a map.
 
 	var testm map[string]interface{}
-	var wantm = map[string]interface {} {
-		"f":     60,
+	var wantm = map[string]interface{}{
+		"f": 60,
 		"inner": map[string]interface{}{
-		    "a": 10,
+			"a": 10,
 		},
 		"d": 40,
 		"e": 50,

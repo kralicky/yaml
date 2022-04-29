@@ -29,12 +29,13 @@ import (
 )
 
 type encoder struct {
-	emitter  yaml_emitter_t
-	event    yaml_event_t
-	out      []byte
-	flow     bool
-	indent   int
-	doneInit bool
+	emitter         yaml_emitter_t
+	event           yaml_event_t
+	out             []byte
+	flow            bool
+	indent          int
+	alwaysOmitEmpty bool
+	doneInit        bool
 }
 
 func newEncoder() *encoder {
@@ -227,7 +228,7 @@ func (e *encoder) structv(tag string, in reflect.Value) {
 					continue
 				}
 			}
-			if info.OmitEmpty && isZero(value) {
+			if (e.alwaysOmitEmpty || info.OmitEmpty) && isZero(value) {
 				continue
 			}
 			e.marshal("", reflect.ValueOf(info.Key))
