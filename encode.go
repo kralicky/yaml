@@ -35,11 +35,14 @@ type encoder struct {
 	flow            bool
 	indent          int
 	alwaysOmitEmpty bool
+	overrides       map[reflect.Type]OverrideMarshaler
 	doneInit        bool
 }
 
 func newEncoder() *encoder {
-	e := &encoder{}
+	e := &encoder{
+		overrides: make(map[reflect.Type]OverrideMarshaler),
+	}
 	yaml_emitter_initialize(&e.emitter)
 	yaml_emitter_set_output_string(&e.emitter, &e.out)
 	yaml_emitter_set_unicode(&e.emitter, true)
@@ -47,7 +50,9 @@ func newEncoder() *encoder {
 }
 
 func newEncoderWithWriter(w io.Writer) *encoder {
-	e := &encoder{}
+	e := &encoder{
+		overrides: make(map[reflect.Type]OverrideMarshaler),
+	}
 	yaml_emitter_initialize(&e.emitter)
 	yaml_emitter_set_output_writer(&e.emitter, w)
 	yaml_emitter_set_unicode(&e.emitter, true)
@@ -138,7 +143,16 @@ func (e *encoder) marshal(tag string, in reflect.Value) {
 		e.stringv(tag, reflect.ValueOf(value.String()))
 		return
 	case Marshaler:
-		v, err := value.MarshalYAML()
+		var v interface{}
+		var err error
+		if m, ok := e.overrides[in.Type()]; ok {
+			if m == nil {
+				break
+			}
+			v, err = m.MarshalYAML(value)
+		} else {
+			v, err = value.MarshalYAML()
+		}
 		if err != nil {
 			fail(err)
 		}

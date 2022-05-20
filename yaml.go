@@ -51,6 +51,10 @@ type Marshaler interface {
 	MarshalYAML() (interface{}, error)
 }
 
+type OverrideMarshaler interface {
+	MarshalYAML(interface{}) (interface{}, error)
+}
+
 // Unmarshal decodes the first document found within the in byte slice
 // and assigns decoded values into the out value.
 //
@@ -282,6 +286,13 @@ func (e *Encoder) SetIndent(spaces int) {
 // all fields, regardless of if the field tag is set.
 func (e *Encoder) SetAlwaysOmitEmpty(alwaysOmitEmpty bool) {
 	e.encoder.alwaysOmitEmpty = alwaysOmitEmpty
+}
+
+// ReplaceMarshalerForType allows dynamic replacement of a type's custom
+// marshaler. If the replacement Marshaler is nil, the custom marshaler for
+// the type will be ignored.
+func (e *Encoder) OverrideMarshalerForType(t reflect.Type, replacement OverrideMarshaler) {
+	e.encoder.overrides[t] = replacement
 }
 
 // Close closes the encoder by writing any remaining data.
